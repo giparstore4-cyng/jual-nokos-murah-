@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>GiparStore | Jual Nomor Virtual & OTP Terpercaya</title>
+  <!-- Google Fonts & Font Awesome -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(145deg, #f8fafc 0%, #eff3f8 100%);
+      color: #0f172a;
+    }
+    :root {
+      --primary: #e67e22;
+      --primary-dark: #d35400;
+      --primary-light: #fef3e8;
+      --secondary: #1e293b;
+      --card-bg: rgba(255,255,255,0.95);
+      --shadow-lg: 0 25px 35px -12px rgba(0,0,0,0.1);
+      --shadow-md: 0 10px 20px -5px rgba(0,0,0,0.05);
+      --border-radius: 28px;
+    }
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 28px;
+    }
+    /* Navbar */
+    .navbar {
+      background: rgba(255,255,255,0.98);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 2px 15px rgba(0,0,0,0.03);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 1px solid rgba(226,232,240,0.6);
+    }
+    .nav-wrapper {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 0;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    .logo h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #e67e22, #f39c12);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+    }
+    .logo span {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--primary-dark);
+      display: block;
+      letter-spacing: 0.5px;
+    }
+    .user-stats {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      background: rgba(255,255,255,0.7);
+      padding: 6px 20px;
+      border-radius: 60px;
+      backdrop-filter: blur(4px);
+    }
+    .saldo-box {
+      background: var(--primary-light);
+      padding: 6px 18px;
+      border-radius: 40px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+    }
+    .btn-google {
+      background: #e67e22;
+      color: white;
+      border: none;
+      padding: 8px 20px;
+      border-radius: 40px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .btn-logout {
+      background: #e2e8f0;
+      color: #1e293b;
+      border: none;
+      padding: 8px 18px;
+      border-radius: 40px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    /* Hero */
+    .hero {
+      background: radial-gradient(ellipse at 70% 30%, #fff6ed, #ffe6d5);
+      border-radius: 48px;
+      padding: 50px 40px;
+      margin: 30px 0 20px;
+      box-shadow: var(--shadow-md);
+    }
+    .hero-content {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 30px;
+    }
+    .hero-text h2 {
+      font-size: 2.8rem;
+      font-weight: 800;
+      line-height: 1.2;
+    }
+    .price-chip {
+      background: white;
+      border-radius: 60px;
+      padding: 6px 20px;
+      display: inline-block;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+    /* Section */
+    .section-title {
+      font-size: 1.8rem;
+      font-weight: 800;
+      margin: 40px 0 20px;
+      position: relative;
+    }
+    .section-title:after {
+      content: '';
+      width: 60px;
+      height: 4px;
+      background: var(--primary);
+      border-radius: 4px;
+      display: block;
+      margin-top: 8px;
+    }
+    .queue-card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 24px 32px;
+      margin: 20px 0;
+      box-shadow: var(--shadow-md);
+      border: 1px solid #ffe4cc;
+    }
+    .deposit-section {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 28px;
+      margin: 24px 0;
+      box-shadow: var(--shadow-md);
+    }
+    .deposit-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin: 20px 0;
+    }
+    .deposit-card {
+      background: linear-gradient(135deg, #fef9f0, #fff);
+      border: 1px solid #ffe0c0;
+      border-radius: 28px;
+      padding: 16px 24px;
+      text-align: center;
+      flex: 1 0 120px;
+      cursor: pointer;
+      transition: 0.2s;
+      font-weight: 600;
+    }
+    .deposit-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--primary);
+    }
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+      gap: 32px;
+      margin: 30px 0 50px;
+    }
+    .product-card {
+      background: var(--card-bg);
+      border-radius: 32px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      box-shadow: var(--shadow-md);
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(255,255,255,0.5);
+    }
+    .product-card:hover {
+      transform: translateY(-8px);
+      box-shadow: var(--shadow-lg);
+    }
+    .product-img {
+      background: linear-gradient(145deg, #fef3e8, #ffead9);
+      text-align: center;
+      padding: 32px;
+    }
+    .product-img i {
+      font-size: 70px;
+      color: var(--primary);
+    }
+    .product-info {
+      padding: 24px;
+    }
+    .price-tag {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--primary-dark);
+      margin: 12px 0;
+    }
+    .btn-buy {
+      width: 100%;
+      background: var(--secondary);
+      color: white;
+      border: none;
+      padding: 14px 0;
+      border-radius: 60px;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: 0.2s;
+      font-family: inherit;
+      margin-top: 12px;
+    }
+    .btn-buy:hover {
+      background: var(--primary);
+    }
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(6px);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .modal-card {
+      background: white;
+      max-width: 480px;
+      width: 90%;
+      border-radius: 40px;
+      padding: 28px;
+      animation: fadeIn 0.2s;
+    }
+    @keyframes fadeIn {
+      from { transform: scale(0.95); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .help-contact {
+      background: #e67e2210;
+      border-radius: 24px;
+      padding: 16px 24px;
+      margin: 30px 0 20px;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .help-btn {
+      background: #25D366;
+      color: white;
+      padding: 10px 24px;
+      border-radius: 40px;
+      text-decoration: none;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    footer {
+      background: #0f172a;
+      color: #94a3b8;
+      padding: 40px 0;
+      margin-top: 60px;
+      border-radius: 48px 48px 0 0;
+      text-align: center;
+    }
+    @media (max-width: 700px) {
+      .hero-text h2 { font-size: 1.8rem; }
+      .product-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="navbar">
+  <div class="container nav-wrapper">
+    <div class="logo">
+      <h1>giparstore</h1>
+      <span>virtual number & OTP service</span>
+    </div>
+    <div class="user-stats" id="userArea">
+      <div class="saldo-box" id="saldoBox" style="display: none;">
+        <i class="fas fa-coins"></i>
+        <span id="saldoAmount">Rp0</span>
+      </div>
+      <button id="googleLoginBtn" class="btn-google"><i class="fab fa-google"></i> Masuk</button>
+      <button id="logoutBtn" class="btn-logout" style="display: none;">Keluar</button>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="hero">
+    <div class="hero-content">
+      <div class="hero-text">
+        <div class="price-chip"><i class="fas fa-tag"></i> Mulai Rp5.000 - Rp160.000</div>
+        <h2>Jual <span style="color:#e67e22;">Nomor Virtual</span><br>& OTP Premium</h2>
+        <p style="margin: 20px 0;">✅ Login Google ✅ Deposit via Transfer ✅ Beli langsung potong saldo ✅ Admin kirim nomor ke WhatsApp Anda ✅ Antrian teratur</p>
+        <a href="#produk" style="background:#e67e22; color:white; padding:12px 28px; border-radius:40px; text-decoration:none; font-weight:700;">Mulai Beli</a>
+      </div>
+      <div><i class="fas fa-mobile-alt" style="font-size:110px; color:#e67e22;"></i></div>
+    </div>
+  </div>
+
+  <div class="queue-card">
+    <h3><i class="fas fa-hourglass-half"></i> Cara Kerja</h3>
+    <p>1. Login dengan Google.<br>2. Deposit saldo (transfer ke rekening yang ditampilkan, lalu konfirmasi).<br>3. Pilih produk, klik "Beli Sekarang". Saldo akan dipotong.<br>4. Admin akan mengirimkan nomor virtual/OTP ke WhatsApp Anda dalam waktu 1-15 menit sesuai antrian.<br>5. Gunakan nomor tersebut untuk verifikasi OTP.</p>
+  </div>
+
+  <div id="deposit" class="deposit-section">
+    <h3><i class="fas fa-wallet"></i> Deposit Saldo</h3>
+    <p>Pilih nominal, transfer ke rekening berikut, lalu konfirmasi dengan mengirim bukti ke admin. Saldo akan ditambahkan manual.</p>
+    <div class="deposit-grid" id="depositGrid">
+      <div class="deposit-card" data-nom="10000">Rp10.000</div>
+      <div class="deposit-card" data-nom="25000">Rp25.000</div>
+      <div class="deposit-card" data-nom="50000">Rp50.000</div>
+      <div class="deposit-card" data-nom="100000">Rp100.000</div>
+      <div class="deposit-card" data-nom="200000">Rp200.000</div>
+      <div class="deposit-card" data-nom="500000">Rp500.000</div>
+    </div>
+    <p style="font-size:13px; background:#f1f5f9; padding:12px; border-radius:20px;">
+      <i class="fas fa-university"></i> Rekening tujuan: <strong>BCA 1234567890</strong> a.n GiparStore<br>
+      <i class="fab fa-whatsapp"></i> Konfirmasi deposit: kirim bukti transfer ke <strong>62895326378456</strong>
+    </p>
+  </div>
+
+  <div id="produk">
+    <h2 class="section-title">🔥 Pilihan Nomor Virtual / OTP</h2>
+    <div class="product-grid" id="productGrid"></div>
+  </div>
+
+  <div class="help-contact">
+    <span><i class="fas fa-headset"></i> Ada kendala? Hubungi admin:</span>
+    <a href="https://wa.me/62895326378456" target="_blank" class="help-btn"><i class="fab fa-whatsapp"></i> 62895326378456</a>
+  </div>
+</div>
+
+<footer>
+  <div class="container">© 2025 GiparStore • Jasa Nomor Virtual & OTP • Support 24/7</div>
+</footer>
+
+<!-- Modal Konfirmasi Deposit (manual ke admin) -->
+<div id="depositModal" class="modal">
+  <div class="modal-card">
+    <h3><i class="fas fa-credit-card"></i> Konfirmasi Deposit</h3>
+    <p style="margin: 12px 0;">Nominal: <strong id="depositNominal"></strong></p>
+    <p>Transfer ke <strong>BCA 1234567890</strong> a.n GiparStore</p>
+    <p style="margin: 12px 0;">Setelah transfer, kirim bukti ke WhatsApp admin untuk konfirmasi dan penambahan saldo.</p>
+    <div style="display: flex; gap:12px; margin-top:20px;">
+      <a href="https://wa.me/62895326378456?text=Halo%20admin%2C%20saya%20sudah%20transfer%20deposit%20Rp" target="_blank" class="btn-buy" style="background:#25D366; text-align:center; text-decoration:none;">Kirim Bukti ke WA</a>
+      <button id="cancelDepositBtn" class="btn-buy" style="background:#e2e8f0; color:#1e293b;">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ----------------------------- FIREBASE CONFIG (GANTI DENGAN PROJECT ANDA) -----------------------------
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_AUTH_DOMAIN",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_STORAGE_BUCKET",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
+  };
+  // Jika tidak diisi, akan berjalan mode demo (localStorage)
+  let firebaseReady = false, auth, db;
+  try {
+    firebase.initializeApp(firebaseConfig);
+    auth = firebase.auth();
+    db = firebase.firestore();
+    firebaseReady = true;
+  } catch(e) { console.warn("Firebase config invalid, using demo mode"); }
+
+  // Data produk
+  const products = [
+    { id:1, name:"Nokos Basic", desc:"Nomor virtual untuk OTP dasar (WhatsApp, Telegram)", price:5000, priceText:"Rp5.000", icon:"fa-sim-card" },
+    { id:2, name:"Nokos Regular", desc:"Support berbagai platform (Shopee, Gojek, dll)", price:10000, priceText:"Rp10.000", icon:"fa-mobile-alt" },
+    { id:3, name:"Nokos Premium", desc:"Nomor fresh, garansi 1x ganti", price:25000, priceText:"Rp25.000", icon:"fa-star" },
+    { id:4, name:"Nokos Pro", desc:"Cocok untuk verifikasi bank & e-wallet", price:50000, priceText:"Rp50.000", icon:"fa-shield-alt" },
+    { id:5, name:"Nokos Unlimited", desc:"Multi OTP dalam 1 nomor", price:100000, priceText:"Rp100.000", icon:"fa-infinity" },
+    { id:6, name:"Nokos VIP Gold", desc:"Prioritas antrian + garansi full", price:160000, priceText:"Rp160.000", icon:"fa-crown" }
+  ];
+
+  let currentUser = null;
+  let userBalance = 0;
+  let selectedDeposit = 0;
+
+  const googleBtn = document.getElementById('googleLoginBtn');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const saldoBox = document.getElementById('saldoBox');
+  const saldoSpan = document.getElementById('saldoAmount');
+
+  function updateBalanceUI() {
+    if (saldoSpan) saldoSpan.innerText = 'Rp' + userBalance.toLocaleString('id-ID');
+  }
+
+  async function saveBalance(uid, balance) {
+    if (firebaseReady && db && uid) {
+      await db.collection('users').doc(uid).set({ balance: balance }, { merge: true });
+    } else {
+      localStorage.setItem('gipar_balance_demo', balance);
+    }
+  }
+
+  async function loadBalance(uid) {
+    if (firebaseReady && db && uid) {
+      const doc = await db.collection('users').doc(uid).get();
+      return doc.exists ? (doc.data().balance || 0) : 0;
+    } else {
+      return parseInt(localStorage.getItem('gipar_balance_demo') || '0');
+    }
+  }
+
+  // Login Google
+  async function handleGoogleLogin() {
+    if (!firebaseReady) {
+      alert("Mode demo: login simulasi. Silakan ganti firebaseConfig untuk production.");
+      currentUser = { uid: 'demo_user', displayName: 'Demo User' };
+      userBalance = await loadBalance('demo_user');
+      updateBalanceUI();
+      saldoBox.style.display = 'flex';
+      googleBtn.style.display = 'none';
+      logoutBtn.style.display = 'inline-block';
+      return;
+    }
+    try {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      const result = await auth.signInWithPopup(provider);
+      currentUser = result.user;
+      userBalance = await loadBalance(currentUser.uid);
+      updateBalanceUI();
+      saldoBox.style.display = 'flex';
+      googleBtn.style.display = 'none';
+      logoutBtn.style.display = 'inline-block';
+    } catch(e) { alert("Login gagal: " + e.message); }
+  }
+
+  async function handleLogout() {
+    if (firebaseReady && auth) await auth.signOut();
+    currentUser = null;
+    userBalance = 0;
+    updateBalanceUI();
+    saldoBox.style.display = 'none';
+    googleBtn.style.display = 'inline-block';
+    logoutBtn.style.display = 'none';
+    localStorage.removeItem('gipar_balance_demo');
+  }
+
+  // Deposit modal
+  const depositModal = document.getElementById('depositModal');
+  const depositNominalSpan = document.getElementById('depositNominal');
+  const cancelDeposit = document.getElementById('cancelDepositBtn');
+
+  document.querySelectorAll('.deposit-card').forEach(card => {
+    card.addEventListener('click', () => {
+      if (!currentUser) { alert("Login dulu!"); return; }
+      selectedDeposit = parseInt(card.getAttribute('data-nom'));
+      depositNominalSpan.innerText = 'Rp' + selectedDeposit.toLocaleString('id-ID');
+      depositModal.style.display = 'flex';
+    });
+  });
+  cancelDeposit.addEventListener('click', () => { depositModal.style.display = 'none'; });
+
+  // Generate kode antrian
+  function generateQueueCode() {
+    const now = new Date();
+    return `ANT-${now.getFullYear()}${(now.getMonth()+1).toString().padStart(2,'0')}${now.getDate().toString().padStart(2,'0')}${now.getHours().toString().padStart(2,'0')}${now.getMinutes().toString().padStart(2,'0')}${now.getSeconds().toString().padStart(2,'0')}-${Math.floor(Math.random()*1000)}`;
+  }
+
+  // Kirim notifikasi ke admin via WA (pembelian)
+  function notifyAdmin(product, customerName, customerPhone, queueCode) {
+    const adminWA = "62895326378456";
+    const time = new Date().toLocaleString('id-ID');
+    const msg = `*🟠 ORDER VIA WEB GIPARSTORE*%0A📌 Kode Antrian: ${queueCode}%0A🕒 ${time}%0A━━━━━━━━━━━━%0A📦 ${product.name} - ${product.priceText}%0A👤 Nama: ${customerName}%0A📱 No WA Pemesan: ${customerPhone}%0A💳 Metode: Deposit (saldo dipotong)%0A━━━━━━━━━━━━%0A*Mohon kirimkan nomor virtual/OTP ke WhatsApp customer di atas sesuai antrian.*`;
+    window.open(`https://wa.me/${adminWA}?text=${encodeURIComponent(msg)}`, '_blank');
+  }
+
+  // Beli via web
+  async function buyViaWeb(product) {
+    if (!currentUser) { alert("Silakan login terlebih dahulu!"); return; }
+    if (userBalance < product.price) {
+      alert(`❌ Saldo tidak mencukupi! Harga ${product.priceText}, saldo Anda Rp${userBalance.toLocaleString('id-ID')}. Silakan deposit.`);
+      document.getElementById('deposit').scrollIntoView({ behavior: 'smooth' });
+      return;
+    }
+    const customerName = prompt("Masukkan nama Anda:", currentUser.displayName || "Customer");
+    if (!customerName) return;
+    const customerPhone = prompt("Masukkan nomor WhatsApp aktif untuk menerima nomor virtual:", "08123456789");
+    if (!customerPhone || customerPhone.length < 9) {
+      alert("Nomor WhatsApp tidak valid (minimal 9 digit)");
+      return;
+    }
+    const confirm = confirm(`Beli ${product.name} seharga ${product.priceText}? Saldo akan dipotong. Lanjutkan?`);
+    if (!confirm) return;
+
+    // Potong saldo
+    userBalance -= product.price;
+    updateBalanceUI();
+    await saveBalance(currentUser.uid, userBalance);
+    const queueCode = generateQueueCode();
+    notifyAdmin(product, customerName, customerPhone, queueCode);
+    alert(`✅ Pembelian berhasil!\n\nKode Antrian: ${queueCode}\nSisa saldo: Rp${userBalance.toLocaleString('id-ID')}\n\nAdmin akan mengirimkan nomor virtual/OTP ke WhatsApp ${customerPhone} sesuai antrian.\n\nMohon tunggu 1-15 menit. Jika ada kendala, hubungi admin di 62895326378456.`);
+  }
+
+  // Render produk
+  function renderProducts() {
+    const grid = document.getElementById('productGrid');
+    if (!grid) return;
+    grid.innerHTML = '';
+    products.forEach(prod => {
+      const card = document.createElement('div');
+      card.className = 'product-card';
+      card.innerHTML = `
+        <div class="product-img"><i class="fas ${prod.icon}"></i></div>
+        <div class="product-info">
+          <h3>${prod.name}</h3>
+          <p style="color:#475569; font-size:0.85rem; margin:8px 0;">${prod.desc}</p>
+          <div class="price-tag">${prod.priceText}</div>
+          <button class="btn-buy" data-id="${prod.id}"><i class="fas fa-shopping-cart"></i> Beli Sekarang</button>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+    document.querySelectorAll('.btn-buy').forEach(btn => {
+      const id = parseInt(btn.getAttribute('data-id'));
+      const prod = products.find(p => p.id === id);
+      btn.addEventListener('click', () => buyViaWeb(prod));
+    });
+  }
+
+  // Auth state listener
+  if (firebaseReady && auth) {
+    auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        currentUser = user;
+        userBalance = await loadBalance(user.uid);
+        updateBalanceUI();
+        saldoBox.style.display = 'flex';
+        googleBtn.style.display = 'none';
+        logoutBtn.style.display = 'inline-block';
+      } else {
+        currentUser = null;
+        userBalance = 0;
+        updateBalanceUI();
+        saldoBox.style.display = 'none';
+        googleBtn.style.display = 'inline-block';
+        logoutBtn.style.display = 'none';
+      }
+    });
+  } else {
+    // Demo mode
+    if (localStorage.getItem('gipar_demo_user')) {
+      currentUser = { uid: 'demo', displayName: 'Demo' };
+      userBalance = parseInt(localStorage.getItem('gipar_balance_demo') || '0');
+      updateBalanceUI();
+      saldoBox.style.display = 'flex';
+      googleBtn.style.display = 'none';
+      logoutBtn.style.display = 'inline-block';
+    }
+  }
+
+  googleBtn.addEventListener('click', handleGoogleLogin);
+  logoutBtn.addEventListener('click', handleLogout);
+  renderProducts();
+
+  // Tutup modal jika klik di luar
+  window.addEventListener('click', (e) => {
+    if (e.target === depositModal) depositModal.style.display = 'none';
+  });
+</script>
+</body>
+</html>
